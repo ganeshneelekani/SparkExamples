@@ -1,6 +1,7 @@
 
 
 from pyspark import SparkContext,SparkConf
+from operator import add,mul
 
 conf = SparkConf().setAppName("PySpark App").setMaster("local[16]")
 sc = SparkContext(conf=conf).getOrCreate()
@@ -72,9 +73,36 @@ if __name__ == '__main__':
     print(sort_by.collect())
     print(sort_by_tmp.collect())
 
+    #GroupByKey
+    #Group the values for each key in the RDD into a single sequence.
+    # Hash-partitions the resulting RDD with numPartitions partitions.
+    rdd = sc.parallelize([("a", 3), ("b", 1), ("a", 1)])
+    print(sorted(rdd.groupByKey().mapValues(len).collect()))
 
+    #flatMapValues(f)
+    #Pass each value in the key-value pair RDD through a flatMap function without changing the keys;
+    # this also retains the original RDD’s partitioning.
+    x = sc.parallelize([("a", ["x", "y", "z"]), ("b", ["p", "r"])])
+    print(x.flatMapValues(lambda x: x).collect())
 
+    #reduceByKey
+    #Merge the values for each key using an associative and commutative reduce function.
+    #This will also perform the merging locally on each mapper before sending results to a reducer,
+    #similarly to a “combiner” in MapReduce.
+    #Output will be partitioned with numPartitions partitions, or the default parallelism level
+    # if numPartitions is not specified. Default partitioner is hash-partition.
+    rdd = sc.parallelize([("a", 1), ("z", 1), ("a", 1)])
+    print(sorted(rdd.reduceByKey(add).collect()))
 
+    #sortByKey
+    print(rdd.sortByKey().collect())
+
+    #foldByKey
+    #Merge the values for each key using an associative function “func” and a neutral “zeroValue”
+    # which may be added to the result an arbitrary number of times,
+    # and must not change the result (e.g., 0 for addition, or 1 for multiplication.)
+    rdd = sc.parallelize([("a", 9), ("b", 1), ("a", 9)])
+    print(rdd.foldByKey(1, mul).collect())
 
 
 
