@@ -6,6 +6,9 @@ from operator import add,mul
 conf = SparkConf().setAppName("PySpark App").setMaster("local[16]")
 sc = SparkContext(conf=conf).getOrCreate()
 
+rdd = sc.parallelize([("a", 1), ("z", 1), ("a", 1)])
+print(sorted(rdd.reduceByKey(add).collect()))
+
 def minmax(it):
     min = max = None
     for val in it:
